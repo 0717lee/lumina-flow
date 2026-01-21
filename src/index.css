@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Mode Palette */
+    --space-950: #e2e8f0;
+    /* Darker Slate-200 to contrast with cursor */
+    /* Main Background */
+    --space-900: #f1f5f9;
+    /* Slate-100 */
+    /* Alt Background */
+    --space-800: #ffffff;
+    /* Surface/Cards */
+    --space-700: #cbd5e1;
+    /* Borders */
+    --space-600: #94a3b8;
+    /* Hover/Accents */
+
+    --starlight-100: #0f172a;
+    /* Main Text (Dark Blue/Black) */
+    --starlight-200: #334155;
+    /* Secondary Text */
+    --starlight-400: #64748b;
+    /* Muted Text */
+
+    --nebula-500: #6366f1;
+    --nebula-400: #818cf8;
+    --nebula-glow: rgba(99, 102, 241, 0.5);
+  }
+
+  .dark {
+    /* Dark Mode Palette (Original) */
+    --space-950: #050508;
+    --space-900: #0B0B0F;
+    --space-800: #15151A;
+    --space-700: #1F1F29;
+    --space-600: #2E2E3A;
+
+    --starlight-100: #FFFFFF;
+    --starlight-200: #F4F4F5;
+    --starlight-400: #A1A1AA;
+
+    --nebula-glow: rgba(99, 102, 241, 0.5);
+  }
+
+  body {
+    @apply bg-space-900 text-starlight-200 antialiased selection:bg-nebula-500 selection:text-white;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    cursor: default;
+    /* Ensure standard pointer by default */
+  }
+
+  /* High-visibility caret for inputs */
+  input,
+  textarea {
+    caret-color: var(--nebula-500);
+  }
+
+  /* Custom cursor for canvas area */
+  .react-flow__pane {
+    cursor: crosshair !important;
+  }
+
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-space-700 rounded-full hover:bg-space-600;
+}
