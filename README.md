@@ -1,71 +1,71 @@
-# React + TypeScript + Vite
+# 🌌 Lumina Flow - Spatial Thought Engine | 空间思维引擎
 
-该模板提供了一个最小的设置，可以让 React 在 Vite 中与 HMR 和一些 ESLint 规则一起工作。
+**Lumina Flow** is a next-generation diagramming tool designed to help you organize thoughts with spatial clarity. Built with a focus on aesthetics, fluidity, and focus.
+**Lumina Flow** 是下一代空间思维导图工具，专为捕捉灵感与整理思绪而生。我们专注于极致的美学设计、流畅的交互体验与深度的专注力。
 
-目前官方提供了两个插件：
+![Lumina Flow Preview](/preview.png)
 
--[@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) 使用 [Babel](https://babeljs.io/) （或 [oxc](https://oxc.rs) 在 [rolldown-vite](https://vite.dev/guide/rolldown) 中使用时）进行快速刷新
--[@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) 使用 [SWC](https://swc.rs/) 进行快速刷新
+## ✨ Key Features | 核心功能
 
-## 反应编译器
+- **💎 Glassmorphism UI**: A stunning, modern interface featuring semi-transparent glass nodes and ambient lighting.
+  - **磨砂玻璃 UI**: 采用现代化的半透明磨砂质感与环境光效 (Starlight/Nebula 主题)，带来令人惊艳的视觉体验。
 
-此模板上未启用 React 编译器，因为它会影响开发和构建性能。要添加它，请参阅[本文档](https://react.dev/learn/react-compiler/installation)。
+- **🌌 Spatial Canvas**: An infinite canvas powered by React Flow, optimized for smooth navigation and interaction.
+  - **无限空间画布**: 基于 React Flow 打造的无限画布，优化了丝滑的拖拽与缩放交互。
 
-## 扩展 ESLint 配置
-如果您正在开发生产应用程序，我们建议更新配置以启用类型感知的 lint 规则：
+- **🔦 Spotlight Mode**: Focus on what matters. Click any node to dim the noise and highlight only the connected ideas.
+  - **专注聚光灯**: 点击任意节点，自动将周围无关内容变暗模糊，仅高亮当前节点及其关联想法，助您深度思考。
 
-````js
-导出默认定义配置（[
-  全局忽略（['dist']），
-  {
-    文件：['**/*.{ts,tsx}'],
-    延伸：[
-      //其他配置...
+- **🎋 Smart Auto-Layout**: One-click "Gravity" layout that instantly organizes chaotic nodes into a clean, hierarchical structure.
+  - **智能引力布局**: 无论想法多杂乱，点击“智能整理”按钮，瞬间像引力般自动归位，呈现清晰的层级结构。
 
-      //删除 tseslint.configs.recommended 并替换为此
-      tseslint.configs.recommendedTypeChecked，
-      //或者，使用它来实现更严格的规则
-      tseslint.configs.strictTypeChecked，
-//可选地，为风格规则添加此内容
-      tseslint.configs.stylisticTypeChecked，
+- **🌓 Adaptive Theming**: Seamlessly switches between Light, Dark, and System modes with carefully calibrated contrast.
+  - **自适应主题**: 完美适配深色/浅色模式，支持跟随系统自动切换，每一处对比度都经过精心调校。
 
-      //其他配置...
-    ],
-    语言选项：{
-      解析器选项：{
-        项目：['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      //其他选项...
-    },
-  },
-]）
-````
-您还可以安装 [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) 和 [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) React 特定的 lint 规则：
+- **🌍 Full Localization**: Native support for English and Chinese (Simplified).
+  - **中英双语**: 原生支持简体中文与英文界面，所有提示与控件均已完全汉化。
 
-````js
-//eslint.config.js
-从“eslint-plugin-react-x”导入reactX
-从“eslint-plugin-react-dom”导入reactDom
+## 🛠️ Tech Stack | 技术栈
 
-导出默认定义配置（[
-  全局忽略（['dist']），
-  {
-    文件：['**/*.{ts,tsx}'],
-延伸：[
-      //其他配置...
-      //为 React 启用 lint 规则
-      reactX.configs['推荐的打字稿'],
-      //为 React DOM 启用 lint 规则
-      reactDom.configs.推荐，
-    ],
-    语言选项：{
-      解析器选项：{
-        项目：['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      //其他选项...
-    },
-  },
-]）
-````
+- **Framework**: React 18 + Vite
+- **Core Library**: React Flow (@xyflow/react)
+- **Styling**: TailwindCSS + Custom Design System
+- **State Management**: Zustand
+- **Algorithms**: Dagre (Graph Layout)
+- **Icons**: Lucide React
+
+## 🚀 Getting Started | 快速开始
+
+1.  **Clone the repository | 克隆仓库**
+    ```bash
+    git clone https://github.com/0717lee/lumina-flow.git
+    cd lumina-flow
+    ```
+
+2.  **Install dependencies | 安装依赖**
+    ```bash
+    npm install
+    ```
+    > **Note**: Requires Node.js v18+ | **注意**: 需要 Node.js v18 或更高版本。
+
+3.  **Run the development server | 启动开发服务器**
+    ```bash
+    npm run dev
+    ```
+
+## 🎮 How to Use | 操作指南
+
+- **Create Node**: Double-click anywhere on the empty canvas.
+  - **创建节点**: 双击画布空白处。
+- **Connect**: Drag from one node handle to another.
+  - **连接想法**: 拖拽节点边缘的手柄进行连线。
+- **Focus**: Click a node to enter **Spotlight Mode**. Click empty space to exit.
+  - **专注模式**: 单击节点进入聚光灯模式，单击空白处退出。
+- **Auto-Layout**: Click the **Branch Icon** in the bottom-left toolbar.
+  - **智能整理**: 点击左下角工具栏的分支图标。
+- **Edit Text**: Click inside a node to type.
+  - **编辑内容**: 点击节点内部即可输入文本。
+
+## 📄 License
+
+MIT License.

@@ -7,6 +7,14 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Planning & Documentation
+*_plan.md
+findings.md
+progress.md
+task_plan.md
+task.md
+todo.md
+
 node_modules
 dist
 dist-ssr
