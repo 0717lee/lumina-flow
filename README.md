@@ -1,67 +1,85 @@
-# 🌌 Lumina Flow - Spatial Thought Engine
+# Lumina Flow - Spatial Thought Engine
 
 **English** | [简体中文](./README.zh-CN.md)
 
-**Lumina Flow** is a next-generation diagramming tool designed to help you organize thoughts with spatial clarity. Built with a focus on aesthetics, fluidity, and focus.
+**Lumina Flow** is a spatial mind-mapping app for capturing ideas, branching thoughts, and reorganizing complex topics on an infinite canvas. It pairs a polished glass-inspired interface with fast keyboard-first interactions, persistent local storage, and lightweight export tools.
 
 ![Lumina Flow Preview](/preview.png)
 
-## ✨ Key Features
+## Key Features
 
-- **💎 Glassmorphism UI**
-  A stunning, modern interface featuring semi-transparent glass nodes and ambient lighting (Starlight/Nebula themes).
+- **Infinite spatial canvas**
+  Build ideas on a large freeform board powered by React Flow with smooth pan, zoom, and connection editing.
 
-- **🌌 Spatial Canvas**
-  An infinite canvas powered by React Flow, optimized for smooth navigation and interaction.
+- **Focused thinking mode**
+  Selecting a node dims unrelated content so the active idea and its direct relationships stay readable.
 
-- **🔦 Spotlight Mode**
-  Focus on what matters. Click any node to dim the noise and highlight only the connected ideas.
+- **Smart structure tools**
+  Use auto-layout to reorganize messy graphs, or create child and sibling nodes quickly with keyboard shortcuts.
 
-- **🎋 Smart Auto-Layout**
-  One-click "Gravity" layout that instantly organizes chaotic nodes into a clean, hierarchical structure.
+- **Multi-board workspace**
+  Manage multiple boards in one local workspace, rename them, switch between them, and keep progress persisted in the browser.
 
-- **🌓 Adaptive Theming**
-  Seamlessly switches between Light, Dark, and System modes with carefully calibrated contrast.
+- **Richer node metadata**
+  Each node supports a title, note, tags, color, and status so the map works for both brainstorming and lightweight planning.
 
-- **🌍 Full Localization**
-  Native support for English and Chinese (Simplified).
+- **Portable exports**
+  Export the current view or the full board as PNG, and import/export boards or whole workspaces as JSON.
 
-## 🛠️ Tech Stack
+- **Adaptive theming and localization**
+  Supports Light, Dark, and System themes, plus English and Simplified Chinese UI.
 
-- **Framework**: React 18 + Vite
-- **Core Library**: React Flow (@xyflow/react)
-- **Styling**: TailwindCSS + Custom Design System
+## Keyboard Shortcuts
+
+- `Tab`: create a child node from the selected node
+- `Enter`: create a sibling node
+- `Backspace` / `Delete`: remove the selected node
+- `Ctrl/Cmd + Z`: undo
+- `Shift + Ctrl/Cmd + Z`: redo
+
+## Tech Stack
+
+- **Framework**: React 19 + Vite
+- **Core Canvas**: React Flow (`@xyflow/react`)
 - **State Management**: Zustand
-- **Algorithms**: Dagre (Graph Layout)
+- **Styling**: Tailwind CSS + custom design tokens
+- **Graph Layout**: Dagre
+- **Export**: `html-to-image`
 - **Icons**: Lucide React
 
-## 🚀 Getting Started
+## Getting Started
 
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/0717lee/lumina-flow.git
-    cd lumina-flow
-    ```
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/0717lee/lumina-flow.git
+   cd lumina-flow
+   ```
 
-2.  **Install dependencies**
-    ```bash
-    npm install
-    ```
-    > **Note**: Requires Node.js v18+.
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+   Note: Node.js `18+` is recommended.
 
-3.  **Run the development server**
-    ```bash
-    npm run dev
-    ```
+3. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-## 🎮 How to Use
+4. **Build for production**
+   ```bash
+   npm run build
+   ```
 
-- **Create Node**: Double-click anywhere on the empty canvas.
-- **Connect**: Drag from one node handle to another.
-- **Focus**: Click a node to enter **Spotlight Mode**. Click empty space to exit.
-- **Auto-Layout**: Click the **Branch Icon** in the bottom-left toolbar.
-- **Edit Text**: Click inside a node to type.
+## How to Use
 
-## 📄 License
+- Double-click empty canvas space to create a node.
+- Drag handles between nodes to create connections.
+- Double-click a node title to edit it inline.
+- Open the inspector to edit notes, tags, color, and status.
+- Use the workspace panel to create boards or import/export JSON.
+- Use the bottom toolbar to switch theme, undo/redo, and export PNG snapshots.
+
+## License
 
 MIT License.

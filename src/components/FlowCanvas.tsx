@@ -1,188 +1,262 @@
-import { ReactFlow, Background, useReactFlow, MiniMap, BackgroundVariant, useOnSelectionChange } from '@xyflow/react';
-import type { Node } from '@xyflow/react';
-import useFlowStore from '@/store/flowStore';
+import { Background, BackgroundVariant, ReactFlow, useOnSelectionChange, useReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { useCallback, useEffect } from 'react';
+import { Maximize, Minus, Plus, Workflow } from 'lucide-react';
+import type { MouseEvent, ReactNode } from 'react';
+import { startTransition, useEffect, useState } from 'react';
 import { translations } from '@/i18n/translations';
-import { Plus, Minus, Maximize, Workflow } from 'lucide-react';
-import { getLayoutedElements } from '@/utils/layout';
-
 import GlassNode from '@/nodes/GlassNode';
+import useFlowStore, { selectActiveBoard } from '@/store/flowStore';
+import { useFlowUiStore } from '@/store/uiStore';
+import type { FlowEdge } from '@/types/flow';
 
 const nodeTypes = {
-    glass: GlassNode,
+  glass: GlassNode,
 };
 
 export default function FlowCanvas() {
-    const { nodes, edges, onNodesChange, onEdgesChange, onConnect, setNodes, addNode, language, theme } = useFlowStore();
-    const { screenToFlowPosition, fitView, zoomIn, zoomOut } = useReactFlow();
-    const t = translations[language];
+  const activeBoardId = useFlowStore((state) => state.activeBoardId);
+  const nodes = useFlowStore((state) => selectActiveBoard(state).nodes);
+  const edges = useFlowStore((state) => selectActiveBoard(state).edges);
+  const language = useFlowStore((state) => state.language);
+  const theme = useFlowStore((state) => state.theme);
+  const onNodesChange = useFlowStore((state) => state.onNodesChange);
+  const onEdgesChange = useFlowStore((state) => state.onEdgesChange);
+  const onConnect = useFlowStore((state) => state.onConnect);
+  const createNodeAt = useFlowStore((state) => state.createNodeAt);
+  const createLinkedNode = useFlowStore((state) => state.createLinkedNode);
+  const deleteNode = useFlowStore((state) => state.deleteNode);
+  const applyLayout = useFlowStore((state) => state.applyLayout);
+  const startDragHistory = useFlowStore((state) => state.startDragHistory);
+  const commitDragHistory = useFlowStore((state) => state.commitDragHistory);
+  const undo = useFlowStore((state) => state.undo);
+  const redo = useFlowStore((state) => state.redo);
+  const selectedNodeId = useFlowUiStore((state) => state.selectedNodeId);
+  const requestNodeFocus = useFlowUiStore((state) => state.requestNodeFocus);
+  const resetCanvasUi = useFlowUiStore((state) => state.resetCanvasUi);
+  const setSelection = useFlowUiStore((state) => state.setSelection);
+  const { screenToFlowPosition, fitView, zoomIn, zoomOut } = useReactFlow();
+  const [isLayouting, setIsLayouting] = useState(false);
+  const t = translations[language];
 
-    // Update spotlight when selection changes
-    useOnSelectionChange({
-        onChange: ({ nodes: selectedNodes }) => {
-            const ids = new Set(selectedNodes.map(n => n.id));
+  useOnSelectionChange({
+    onChange: ({ nodes: selectedNodes }) => {
+      const selectedId = selectedNodes[0]?.id ?? null;
+      const connectedNodeIds = selectedId ? collectConnectedNodeIds(selectedNodes, edges) : [];
 
-            // Calculate connected nodes if a node is selected
-            if (ids.size > 0) {
-                const connectedParams = new Set<string>();
-                ids.forEach(id => {
-                    connectedParams.add(id);
-                    // Find neighbors
-                    edges.forEach(edge => {
-                        if (edge.source === id) connectedParams.add(edge.target);
-                        if (edge.target === id) connectedParams.add(edge.source);
-                    });
-                });
+      setSelection(selectedId, connectedNodeIds);
+    },
+  });
 
-                // Update nodes 'dimmed' status
-                setNodes(nodes.map(node => ({
-                    ...node,
-                    data: {
-                        ...node.data,
-                        dimmed: !connectedParams.has(node.id)
-                    }
-                })));
-            } else {
-                // Reset if nothing selected - Only loop if needed to avoid infinite loop provided setNodes is stable
-                // Check if any node is currently dimmed to avoid redundant updates
-                const hasDimmed = nodes.some(n => (n.data as any).dimmed);
-                if (hasDimmed) {
-                    setNodes(nodes.map(node => ({
-                        ...node,
-                        data: {
-                            ...node.data,
-                            dimmed: false
-                        }
-                    })));
-                }
-            }
-        },
-    });
+  useEffect(() => {
+    resetCanvasUi();
+    window.requestAnimationFrame(() => fitView({ duration: 450, padding: 0.25 }));
+  }, [activeBoardId, fitView, resetCanvasUi]);
 
-    // --- Auto Layout Logic ---
-    const onLayout = useCallback(() => {
-        const { nodes: layoutedNodes } = getLayoutedElements(
-            nodes,
-            edges
-        );
-        setNodes([...layoutedNodes]);
-        window.requestAnimationFrame(() => fitView({ duration: 800 }));
-    }, [nodes, edges, setNodes, fitView]);
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (isEditableTarget(event.target)) {
+        return;
+      }
 
+      const isUndoShortcut = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z';
 
-    // Determine effective theme for grid color
-    const effectiveTheme = theme === 'system'
-        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-        : theme;
+      if (isUndoShortcut) {
+        event.preventDefault();
+        resetCanvasUi();
 
-    // Higher contrast colors for "feeling" the grid
-    const gridColor = effectiveTheme === 'light' ? '#64748b' : '#818cf8'; // Slate-500 or Lighter Indigo
-
-    // Initialize with some data if empty
-    useEffect(() => {
-        if (nodes.length === 0) {
-            const initialNodes: Node[] = [
-                { id: '1', position: { x: 0, y: 0 }, data: { label: t.doubleClick }, type: 'glass' },
-            ];
-            setNodes(initialNodes);
+        if (event.shiftKey) {
+          redo();
+        } else {
+          undo();
         }
-    }, [nodes.length, setNodes, t.doubleClick]);
 
-    const onPaneDoubleClick = useCallback(
-        (event: React.MouseEvent) => {
-            const position = screenToFlowPosition({
-                x: event.clientX,
-                y: event.clientY,
-            });
+        return;
+      }
 
-            const newNode: Node = {
-                id: `${Date.now()}`,
-                type: 'glass',
-                position,
-                data: { label: t.newNode },
-            };
+      if (!selectedNodeId) {
+        return;
+      }
 
-            addNode(newNode);
-        },
-        [screenToFlowPosition, addNode, t.newNode],
-    );
+      if (event.key === 'Tab') {
+        event.preventDefault();
+        const nodeId = createLinkedNode(selectedNodeId, 'child');
 
-    return (
-        <div
-            className="w-full h-full bg-space-950"
-            onDoubleClick={onPaneDoubleClick}
+        if (nodeId) {
+          requestNodeFocus(nodeId);
+        }
+      }
+
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const nodeId = createLinkedNode(selectedNodeId, 'sibling');
+
+        if (nodeId) {
+          requestNodeFocus(nodeId);
+        }
+      }
+
+      if (event.key === 'Backspace' || event.key === 'Delete') {
+        event.preventDefault();
+        deleteNode(selectedNodeId);
+        resetCanvasUi();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [createLinkedNode, deleteNode, redo, requestNodeFocus, resetCanvasUi, selectedNodeId, undo]);
+
+  const onPaneDoubleClick = (event: MouseEvent<HTMLDivElement>): void => {
+    const target = event.target as HTMLElement;
+
+    if (target.closest('.react-flow__node') || target.closest('button') || target.closest('input') || target.closest('textarea')) {
+      return;
+    }
+
+    const position = screenToFlowPosition({
+      x: event.clientX,
+      y: event.clientY,
+    });
+    const nodeId = createNodeAt(position);
+
+    requestNodeFocus(nodeId);
+  };
+
+  const onLayout = async (): Promise<void> => {
+    if (isLayouting || nodes.length < 2) {
+      return;
+    }
+
+    setIsLayouting(true);
+
+    try {
+      const { getLayoutedElements } = await import('@/utils/layout');
+      const { nodes: layoutedNodes } = getLayoutedElements(nodes, edges);
+
+      startTransition(() => {
+        applyLayout(layoutedNodes);
+      });
+
+      window.requestAnimationFrame(() => fitView({ duration: 850, padding: 0.25 }));
+    } finally {
+      setIsLayouting(false);
+    }
+  };
+
+  const effectiveTheme = theme === 'system'
+    ? window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light'
+    : theme;
+  const gridColor = effectiveTheme === 'light' ? '#64748b' : '#818cf8';
+
+  return (
+    <div className="w-full h-full bg-space-950">
+      <div className="w-full h-full" onDoubleClick={onPaneDoubleClick}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onNodeDragStart={startDragHistory}
+          onNodeDragStop={commitDragHistory}
+          deleteKeyCode={null}
+          zoomOnDoubleClick={false}
+          fitView
+          className="touch-none"
+          minZoom={0.45}
+          maxZoom={2}
+          defaultEdgeOptions={{
+            type: 'smoothstep',
+            animated: false,
+            style: {
+              stroke: effectiveTheme === 'light' ? '#4f46e5' : '#818cf8',
+              strokeWidth: 2.5,
+            },
+          }}
+          proOptions={{ hideAttribution: true }}
         >
-            <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                nodeTypes={nodeTypes}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
-                zoomOnDoubleClick={false}
-                fitView
-                className="touch-none"
-                minZoom={0.5}
-                maxZoom={2}
-                defaultEdgeOptions={{
-                    type: 'default',
-                    animated: true,
-                    style: { stroke: '#6366f1', strokeWidth: 2 },
-                }}
-                proOptions={{ hideAttribution: true }}
-            >
-                <Background
-                    variant={BackgroundVariant.Dots}
-                    color={gridColor}
-                    gap={24}
-                    size={3} // Increased size
-                    className="opacity-40 transition-colors duration-300" // Increased opacity
-                />
-                <MiniMap
-                    className="!bg-space-800 !border-space-700 !rounded-lg"
-                    nodeColor="#6366f1"
-                    maskColor="rgba(5, 5, 8, 0.8)"
-                    ariaLabel={t.miniMap}
-                    title={t.miniMap} // Visual tooltip
-                />
-                <div className="absolute bottom-6 left-6 z-50 flex flex-col gap-1 bg-space-800 border border-space-700 rounded-lg p-1 shadow-lg">
-                    <button
-                        onClick={() => zoomIn()}
-                        className="p-2 text-nebula-400 hover:bg-space-700 rounded transition-colors"
-                        title={t.zoomIn}
-                    >
-                        <Plus size={16} />
-                    </button>
-                    <div className="h-px w-full bg-space-700" />
-                    <button
-                        onClick={() => zoomOut()}
-                        className="p-2 text-nebula-400 hover:bg-space-700 rounded transition-colors"
-                        title={t.zoomOut}
-                    >
-                        <Minus size={16} />
-                    </button>
-                    <div className="h-px w-full bg-space-700" />
-                    <button
-                        onClick={() => fitView()}
-                        className="p-2 text-nebula-400 hover:bg-space-700 rounded transition-colors"
-                        title={t.fitView}
-                    >
-                        <Maximize size={16} />
-                    </button>
-                    <div className="h-px w-full bg-space-700" />
-                    <button
-                        onClick={onLayout}
-                        className="p-2 text-nebula-400 hover:bg-space-700 rounded transition-colors"
-                        title={t.autoLayout}
-                    >
-                        <Workflow size={16} />
-                    </button>
-                </div>
-            </ReactFlow>
+          <Background
+            variant={BackgroundVariant.Dots}
+            color={gridColor}
+            gap={24}
+            size={3}
+            className="opacity-40 transition-colors duration-300"
+          />
 
-            {/* Overlay UI Layer */}
-            <div className="absolute top-0 left-0 w-full h-full pointer-events-none bg-space-gradient opacity-50 mix-blend-overlay" />
-        </div>
-    );
+          <div className="absolute bottom-6 left-6 z-50 flex flex-col gap-1 bg-space-800/90 border border-space-700 rounded-2xl p-1.5 shadow-xl backdrop-blur-xl">
+            <ControlButton onClick={() => zoomIn()} title={t.zoomIn}>
+              <Plus size={16} />
+            </ControlButton>
+            <Divider />
+            <ControlButton onClick={() => zoomOut()} title={t.zoomOut}>
+              <Minus size={16} />
+            </ControlButton>
+            <Divider />
+            <ControlButton onClick={() => fitView({ duration: 500, padding: 0.25 })} title={t.fitView}>
+              <Maximize size={16} />
+            </ControlButton>
+            <Divider />
+            <ControlButton onClick={onLayout} title={isLayouting ? t.layoutPending : t.autoLayout} disabled={isLayouting}>
+              <Workflow size={16} className={isLayouting ? 'animate-pulse' : ''} />
+            </ControlButton>
+          </div>
+        </ReactFlow>
+      </div>
+
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none bg-space-gradient opacity-50 mix-blend-overlay" />
+    </div>
+  );
+}
+
+function ControlButton(props: {
+  onClick: () => void;
+  title: string;
+  disabled?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      onClick={props.onClick}
+      disabled={props.disabled}
+      className="p-2 text-nebula-400 hover:bg-space-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      title={props.title}
+    >
+      {props.children}
+    </button>
+  );
+}
+
+function Divider() {
+  return <div className="h-px w-full bg-space-700" />;
+}
+
+function collectConnectedNodeIds(selectedNodes: Array<{ id: string }>, edges: FlowEdge[]): string[] {
+  const connectedIds = new Set<string>();
+
+  selectedNodes.forEach((node) => {
+    connectedIds.add(node.id);
+
+    edges.forEach((edge) => {
+      if (edge.source === node.id) {
+        connectedIds.add(edge.target);
+      }
+
+      if (edge.target === node.id) {
+        connectedIds.add(edge.source);
+      }
+    });
+  });
+
+  return Array.from(connectedIds);
+}
+
+function isEditableTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+
+  return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
 }

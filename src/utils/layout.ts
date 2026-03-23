@@ -1,44 +1,59 @@
 import dagre from 'dagre';
 import { Position } from '@xyflow/react';
-import type { Node, Edge } from '@xyflow/react';
+import type { FlowEdge, FlowNode } from '@/types/flow';
 
-const dagreGraph = new dagre.graphlib.Graph();
-dagreGraph.setDefaultEdgeLabel(() => ({}));
+const DEFAULT_NODE_WIDTH = 220;
+const DEFAULT_NODE_HEIGHT = 132;
 
-export const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
-    const isHorizontal = direction === 'LR';
-    dagreGraph.setGraph({ rankdir: direction });
+export function getLayoutedElements(nodes: FlowNode[], edges: FlowEdge[], direction: 'TB' | 'LR' = 'TB') {
+  const graph = new dagre.graphlib.Graph();
+  const isHorizontal = direction === 'LR';
 
-    nodes.forEach((node) => {
-        // Determine dimensions. GlassNodes usually have a minimum width/height.
-        // If we can't dynamic measure, we estimate.
-        dagreGraph.setNode(node.id, { width: 200, height: 80 });
-    });
+  graph.setDefaultEdgeLabel(() => ({}));
+  graph.setGraph({
+    rankdir: direction,
+    ranksep: 120,
+    nodesep: 56,
+    marginx: 32,
+    marginy: 32,
+  });
 
-    edges.forEach((edge) => {
-        dagreGraph.setEdge(edge.source, edge.target);
-    });
+  nodes.forEach((node) => {
+    const width =
+      node.measured?.width ??
+      (typeof node.style?.width === 'number' ? node.style.width : DEFAULT_NODE_WIDTH);
+    const height =
+      node.measured?.height ??
+      (typeof node.style?.minHeight === 'number' ? node.style.minHeight : DEFAULT_NODE_HEIGHT);
 
-    dagre.layout(dagreGraph);
+    graph.setNode(node.id, { width, height });
+  });
 
-    const layoutedNodes = nodes.map((node) => {
-        const nodeWithPosition = dagreGraph.node(node.id);
+  edges.forEach((edge) => {
+    graph.setEdge(edge.source, edge.target);
+  });
 
-        // We are shifting the dagre node position (anchor=center center) to the top left
-        // so it matches React Flow's anchor point.
-        // Actually dagre node position is center. React Flow default is top left.
-        // Let's adjust.
-        return {
-            ...node,
-            targetPosition: isHorizontal ? Position.Left : Position.Top,
-            sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
-            // We explicitly create a new object to force position update
-            position: {
-                x: nodeWithPosition.x - 200 / 2,
-                y: nodeWithPosition.y - 80 / 2,
-            },
-        };
-    });
+  dagre.layout(graph);
 
-    return { nodes: layoutedNodes, edges };
-};
+  const layoutedNodes = nodes.map((node) => {
+    const nodeWithPosition = graph.node(node.id);
+    const width =
+      node.measured?.width ??
+      (typeof node.style?.width === 'number' ? node.style.width : DEFAULT_NODE_WIDTH);
+    const height =
+      node.measured?.height ??
+      (typeof node.style?.minHeight === 'number' ? node.style.minHeight : DEFAULT_NODE_HEIGHT);
+
+    return {
+      ...node,
+      targetPosition: isHorizontal ? Position.Left : Position.Top,
+      sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
+      position: {
+        x: nodeWithPosition.x - width / 2,
+        y: nodeWithPosition.y - height / 2,
+      },
+    };
+  });
+
+  return { nodes: layoutedNodes, edges };
+}

@@ -1,114 +1,159 @@
 import { Handle, Position } from '@xyflow/react';
-import type { NodeProps, Node } from '@xyflow/react';
+import type { NodeProps } from '@xyflow/react';
 import { clsx } from 'clsx';
-import { memo, useState, useCallback, useRef, useEffect } from 'react';
+import { memo, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import useFlowStore from '@/store/flowStore';
+import { useFlowUiStore } from '@/store/uiStore';
 import { translations } from '@/i18n/translations';
+import type { FlowNode } from '@/types/flow';
 
-type GlassNodeData = Node<{
-  label: string;
-}>;
+const colorClasses = {
+  nebula: {
+    accent: 'bg-nebula-500',
+    selectedFrame: 'border-transparent shadow-[inset_0_0_0_1px_rgba(99,102,241,0.34),0_0_28px_rgba(99,102,241,0.16)]',
+    badge: 'bg-space-900 text-nebula-400 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.18)]',
+    handle: '!border-nebula-500',
+  },
+  sun: {
+    accent: 'bg-amber-400',
+    selectedFrame: 'border-transparent shadow-[inset_0_0_0_1px_rgba(251,191,36,0.3),0_0_28px_rgba(251,191,36,0.14)]',
+    badge: 'bg-space-900 text-amber-300 shadow-[inset_0_0_0_1px_rgba(251,191,36,0.18)]',
+    handle: '!border-amber-400',
+  },
+  mint: {
+    accent: 'bg-emerald-400',
+    selectedFrame: 'border-transparent shadow-[inset_0_0_0_1px_rgba(52,211,153,0.28),0_0_28px_rgba(52,211,153,0.14)]',
+    badge: 'bg-space-900 text-emerald-300 shadow-[inset_0_0_0_1px_rgba(52,211,153,0.18)]',
+    handle: '!border-emerald-400',
+  },
+  rose: {
+    accent: 'bg-rose-400',
+    selectedFrame: 'border-transparent shadow-[inset_0_0_0_1px_rgba(251,113,133,0.3),0_0_28px_rgba(251,113,133,0.14)]',
+    badge: 'bg-space-900 text-rose-300 shadow-[inset_0_0_0_1px_rgba(251,113,133,0.18)]',
+    handle: '!border-rose-400',
+  },
+} as const;
 
-function GlassNode({ id, data, selected }: NodeProps<GlassNodeData>) {
-  const { updateNodeLabel, deleteNode, language } = useFlowStore();
-  const [isEditing, setIsEditing] = useState(false);
-  const [label, setLabel] = useState(data.label);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  // Get translations
+function GlassNode({ id, data, selected }: NodeProps<FlowNode>) {
+  const language = useFlowStore((state) => state.language);
+  const updateNode = useFlowStore((state) => state.updateNode);
+  const deleteNode = useFlowStore((state) => state.deleteNode);
+  const isDimmed = useFlowUiStore((state) => state.spotlightNodeIds.length > 0 && !state.spotlightNodeIds.includes(id));
+  const isSearchMatch = useFlowUiStore((state) => state.highlightedNodeIds.includes(id));
+  const shouldAutoEdit = useFlowUiStore((state) => state.pendingFocusNodeId === id);
+  const clearPendingFocus = useFlowUiStore((state) => state.clearPendingFocus);
+  const [isEditing, setIsEditing] = useState(shouldAutoEdit);
+  const [draftLabel, setDraftLabel] = useState(data.label);
   const t = translations[language];
+  const palette = colorClasses[data.color];
 
-  // Sync local state when external data changes
-  useEffect(() => {
-    setLabel(data.label);
-  }, [data.label]);
+  const startEditing = (): void => {
+    setDraftLabel(data.label);
+    setIsEditing(true);
+  };
 
-  const handleBlur = useCallback(() => {
+  const commitLabel = (): void => {
+    const nextLabel = draftLabel.trim() || data.label;
+
+    setDraftLabel(nextLabel);
     setIsEditing(false);
-    updateNodeLabel(id, label);
-  }, [id, label, updateNodeLabel]);
 
-  const handleDelete = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent node selection
-    deleteNode(id);
-  }, [id, deleteNode]);
+    if (nextLabel !== data.label) {
+      updateNode(id, { label: nextLabel });
+    }
+  };
 
   return (
-    <div className={clsx(
-      "group relative min-w-[200px] rounded-2xl border transition-all duration-500", // Increased duration for smooth spotlight
-      "bg-space-800/60 backdrop-blur-xl",
-      (data as any).dimmed ? "opacity-20 grayscale blur-[1px]" : "opacity-100", // Spotlight Effect
-      selected
-        ? "border-nebula-500 shadow-[0_0_30px_rgba(99,102,241,0.3)] ring-1 ring-nebula-500/50"
-        : "border-space-700 hover:border-space-600 shadow-lg hover:shadow-xl",
-    )}>
-      {/* Delete Button (Visible on Hover/Selected) */}
+    <div
+      className={clsx(
+        'group relative min-w-[220px] rounded-3xl border bg-space-800/65 backdrop-blur-xl transition-all duration-300',
+        isDimmed ? 'opacity-20 grayscale blur-[1px]' : 'opacity-100',
+        selected
+          ? palette.selectedFrame
+          : 'border-space-700 shadow-xl hover:border-space-600 hover:shadow-2xl',
+        isSearchMatch && !selected ? 'ring-1 ring-amber-300/40 border-amber-300/40' : '',
+      )}
+    >
       <button
-        onClick={handleDelete}
+        onClick={(event) => {
+          event.stopPropagation();
+          deleteNode(id);
+        }}
         className={clsx(
-          "absolute -top-3 -right-3 z-50 p-1.5 rounded-full bg-space-900 border border-space-700 text-starlight-400 hover:text-red-400 hover:border-red-900 transition-all opacity-0 scale-75",
-          (selected || isEditing) ? "opacity-100 scale-100" : "group-hover:opacity-100 group-hover:scale-100"
+          'absolute -top-3 -right-3 z-50 p-1.5 rounded-full bg-space-900 border border-space-700 text-starlight-400 hover:text-red-400 hover:border-red-900 transition-all opacity-0 scale-75',
+          selected || isEditing ? 'opacity-100 scale-100' : 'group-hover:opacity-100 group-hover:scale-100',
         )}
+        title={t.delete}
       >
         <Trash2 size={14} />
       </button>
 
-      {/* Top Handle */}
       <Handle
         type="target"
         position={Position.Top}
-        className="!w-3 !h-3 !-top-1.5 !bg-space-950 !border-2 !border-nebula-500 transition-all opacity-0 group-hover:opacity-100"
+        className={clsx('!w-3 !h-3 !-top-1.5 !bg-space-950 !border-2 transition-all opacity-0 group-hover:opacity-100', palette.handle)}
       />
 
-      {/* Content */}
       <div className="p-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="w-2 h-2 rounded-full bg-nebula-500 animate-pulse" />
-          <span className="text-[10px] text-space-600 uppercase tracking-widest font-mono">{t.nodeType}</span>
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2">
+            <div className={clsx('w-2.5 h-2.5 rounded-full', palette.accent)} />
+            <span className="text-[10px] text-space-600 uppercase tracking-[0.3em] font-mono">{t.nodeType}</span>
+          </div>
+          <span className={clsx('text-[10px] px-2 py-1 rounded-full uppercase tracking-[0.25em]', palette.badge)}>
+            {t.statuses[data.status]}
+          </span>
         </div>
 
         {isEditing ? (
           <textarea
-            ref={inputRef}
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            onBlur={handleBlur}
+            value={draftLabel}
+            onChange={(event) => setDraftLabel(event.target.value)}
+            onBlur={commitLabel}
             autoFocus
-            onFocus={(e) => {
-              const val = e.target.value;
-              e.target.setSelectionRange(val.length, val.length);
-            }}
-            className="w-full bg-transparent text-starlight-100 font-medium text-lg leading-tight resize-none outline-none border-b border-nebula-500/50"
-            rows={Math.max(1, Math.ceil(label.length / 20))}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                inputRef.current?.blur();
+            onFocus={() => clearPendingFocus()}
+            className="w-full bg-transparent text-starlight-100 font-medium text-lg leading-tight resize-none outline-none border-b border-white/10 pb-1"
+            rows={Math.max(1, Math.ceil(draftLabel.length / 20))}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                commitLabel();
               }
             }}
           />
         ) : (
-          <div
-            onDoubleClick={(e) => {
-              e.stopPropagation();
-              setIsEditing(true);
+          <button
+            type="button"
+            onDoubleClick={(event) => {
+              event.stopPropagation();
+              startEditing();
             }}
-            className="text-starlight-100 font-medium text-lg leading-tight cursor-text min-h-[24px]"
+            className="block w-full text-left text-starlight-100 font-medium text-lg leading-tight min-h-[28px]"
           >
             {data.label}
-          </div>
+          </button>
         )}
+
+        {data.note ? <p className="mt-3 text-sm text-starlight-200/80 leading-6">{data.note}</p> : null}
+
+        {data.tags.length > 0 ? (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {data.tags.slice(0, 3).map((tag) => (
+              <span key={tag} className="text-[11px] px-2 py-1 rounded-full bg-space-900/80 text-space-600 border border-space-700">
+                #{tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
       </div>
 
-      {/* Decorative Gradient Line */}
-      <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-nebula-500/30 to-transparent opacity-50" />
+      <div className={clsx('h-0.5 w-full opacity-60', palette.accent)} />
 
-      {/* Bottom Handle */}
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!w-3 !h-3 !-bottom-1.5 !bg-space-950 !border-2 !border-nebula-500 transition-all opacity-0 group-hover:opacity-100"
+        className={clsx('!w-3 !h-3 !-bottom-1.5 !bg-space-950 !border-2 transition-all opacity-0 group-hover:opacity-100', palette.handle)}
       />
     </div>
   );

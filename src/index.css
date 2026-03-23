@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     /* Light Mode Palette */
     --space-950: #e2e8f0;
     /* Darker Slate-200 to contrast with cursor */
@@ -31,6 +32,7 @@
   }
 
   .dark {
+    color-scheme: dark;
     /* Dark Mode Palette (Original) */
     --space-950: #050508;
     --space-900: #0B0B0F;
@@ -54,7 +56,8 @@
 
   /* High-visibility caret for inputs */
   input,
-  textarea {
+  textarea,
+  select {
     caret-color: var(--nebula-500);
   }
 
@@ -63,6 +66,39 @@
     cursor: crosshair !important;
   }
 
+}
+
+@layer components {
+  .lumina-panel {
+    @apply border border-space-700 bg-space-800 backdrop-blur-2xl shadow-[0_24px_80px_rgba(2,6,23,0.22)];
+  }
+
+  .lumina-surface {
+    @apply rounded-2xl border border-space-700 bg-space-900;
+  }
+
+  .lumina-field {
+    @apply w-full rounded-2xl border border-space-700 bg-space-900 px-3 py-2.5 text-sm text-starlight-100 outline-none transition-colors;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  }
+
+  .lumina-field::placeholder {
+    color: var(--starlight-400);
+    opacity: 1;
+  }
+
+  .lumina-field:focus {
+    border-color: var(--nebula-500);
+    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.3);
+  }
+
+  .lumina-field:-webkit-autofill,
+  .lumina-field:-webkit-autofill:hover,
+  .lumina-field:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--starlight-100);
+    box-shadow: 0 0 0 1000px var(--space-900) inset;
+    transition: background-color 9999s ease-in-out 0s;
+  }
 }
 
 /* Custom Scrollbar */
