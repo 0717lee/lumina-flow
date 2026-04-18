@@ -117,7 +117,7 @@ function AppContent() {
           className={
             language === 'zh'
               ? 'mt-1 hidden text-sm text-starlight-400 sm:block'
-              : 'mt-1 hidden text-sm uppercase tracking-widest text-space-600 sm:block'
+              : 'mt-1 hidden text-sm uppercase tracking-widest text-starlight-400 sm:block'
           }
         >
           {t.subtitle}

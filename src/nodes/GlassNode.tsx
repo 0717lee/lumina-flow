@@ -109,7 +109,7 @@ function GlassNode({ id, data, selected }: NodeProps<FlowNode>) {
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-2">
             <div className={clsx('w-2.5 h-2.5 rounded-full', palette.accent)} />
-            <span className={clsx('text-[10px] text-space-600 font-mono', typeTypography)}>{t.nodeType}</span>
+            <span className={clsx('text-[10px] text-starlight-400 font-mono', typeTypography)}>{t.nodeType}</span>
           </div>
           <span className={clsx('text-[10px] px-2 py-1 rounded-full', badgeTypography, palette.badge)}>
             {t.statuses[data.status]}
@@ -150,7 +150,7 @@ function GlassNode({ id, data, selected }: NodeProps<FlowNode>) {
         {data.tags.length > 0 ? (
           <div className="mt-4 flex flex-wrap gap-2">
             {data.tags.slice(0, 3).map((tag) => (
-              <span key={tag} className="text-[11px] px-2 py-1 rounded-full bg-space-900/80 text-space-600 border border-space-700">
+              <span key={tag} className="text-[11px] px-2 py-1 rounded-full bg-space-900/80 text-starlight-400 border border-space-700">
                 #{tag}
               </span>
             ))}

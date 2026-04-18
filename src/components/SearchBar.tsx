@@ -66,7 +66,7 @@ export default function SearchBar() {
             showDropdown ? 'rounded-b-none border-b-0' : '',
           )}
         >
-          <Search size={16} className="text-space-600 mr-2 group-focus-within:text-nebula-400" aria-hidden />
+          <Search size={16} className="text-starlight-400 mr-2 group-focus-within:text-nebula-400" aria-hidden />
           <input
             ref={inputRef}
             type="text"
@@ -105,7 +105,7 @@ export default function SearchBar() {
               }
             }}
             placeholder={t.searchPlaceholder}
-            className="bg-transparent border-none outline-none text-sm text-starlight-100 w-full placeholder:text-space-600"
+            className="bg-transparent border-none outline-none text-sm text-starlight-100 w-full placeholder:text-starlight-400"
             aria-label={t.searchPlaceholder}
             aria-expanded={showDropdown}
             aria-activedescendant={showDropdown && activeResultIndex >= 0 ? `search-result-${results[activeResultIndex].id}` : undefined}
@@ -127,7 +127,7 @@ export default function SearchBar() {
                     )}
                   >
                     <p className="text-sm text-starlight-100 font-medium truncate">{node.data.label}</p>
-                    <p className="mt-1 text-xs text-space-600 truncate">
+                    <p className="mt-1 text-xs text-starlight-400 truncate">
                       {[node.data.note, node.data.tags.join(' · ')].filter(Boolean).join(' · ')}
                     </p>
                   </button>
@@ -139,7 +139,7 @@ export default function SearchBar() {
                 ) : null}
               </div>
             ) : (
-              <div className="px-4 py-4 text-sm text-space-600">
+              <div className="px-4 py-4 text-sm text-starlight-400">
                 <p>{t.noResults}</p>
                 <p className="mt-1 text-xs">{t.searchHint}</p>
               </div>
@@ -150,7 +150,7 @@ export default function SearchBar() {
 
       <button
         onClick={toggleLanguage}
-        className="flex items-center justify-center w-11 h-11 rounded-full bg-space-800/85 backdrop-blur-xl border border-space-700 text-space-600 hover:text-nebula-400 hover:border-nebula-500 hover:bg-space-700 transition-all font-bold text-xs shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nebula-500 focus-visible:ring-offset-2 focus-visible:ring-offset-space-800"
+        className="flex items-center justify-center w-11 h-11 rounded-full bg-space-800/85 backdrop-blur-xl border border-space-700 text-starlight-400 hover:text-nebula-400 hover:border-nebula-500 hover:bg-space-700 transition-all font-bold text-xs shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nebula-500 focus-visible:ring-offset-2 focus-visible:ring-offset-space-800"
         title={t.switchLang}
         aria-label={t.switchLang}
       >

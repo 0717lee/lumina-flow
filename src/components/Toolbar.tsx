@@ -136,7 +136,7 @@ function ToolbarButton(props: {
     <button
       onClick={props.onClick}
       disabled={props.disabled}
-      className="p-3 rounded-full text-space-600 hover:text-nebula-400 hover:bg-space-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nebula-500 focus-visible:ring-offset-2 focus-visible:ring-offset-space-800"
+      className="p-3 rounded-full text-starlight-400 hover:text-nebula-400 hover:bg-space-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nebula-500 focus-visible:ring-offset-2 focus-visible:ring-offset-space-800"
       title={props.title}
       aria-label={props.title}
     >
@@ -173,7 +173,7 @@ function ThemeSegmented(props: {
             className={
               active
                 ? 'flex items-center justify-center w-9 h-9 rounded-full bg-space-700 text-nebula-400 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.32)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nebula-500 focus-visible:ring-offset-2 focus-visible:ring-offset-space-800 transition-colors'
-                : 'flex items-center justify-center w-9 h-9 rounded-full text-space-600 hover:text-starlight-100 hover:bg-space-700/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nebula-500 focus-visible:ring-offset-2 focus-visible:ring-offset-space-800 transition-colors'
+                : 'flex items-center justify-center w-9 h-9 rounded-full text-starlight-400 hover:text-starlight-100 hover:bg-space-700/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nebula-500 focus-visible:ring-offset-2 focus-visible:ring-offset-space-800 transition-colors'
             }
           >
             {option.icon}

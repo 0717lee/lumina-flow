@@ -4,7 +4,7 @@
 
 **Lumina Flow** 是一个空间化思维导图应用，适合记录灵感、拆分主题、整理复杂关系。它把无限画布、键盘优先的高效交互、本地持久化和轻量导出能力结合在一起，既能用来头脑风暴，也能做轻量规划。
 
-![Lumina Flow Preview](/preview.png)
+![Lumina Flow Preview](/preview-zh-CN.png)
 
 ## 核心功能
 

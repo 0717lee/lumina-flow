@@ -4,7 +4,7 @@
 
 **Lumina Flow** is a spatial mind-mapping app for capturing ideas, branching thoughts, and reorganizing complex topics on an infinite canvas. It pairs a polished glass-inspired interface with fast keyboard-first interactions, persistent local storage, and lightweight export tools.
 
-![Lumina Flow Preview](/preview.png)
+![Lumina Flow Preview](/preview-en.png)
 
 ## Key Features
 
