@@ -84,17 +84,9 @@ export default function Toolbar() {
   };
 
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex gap-2">
-      <div className="flex items-center bg-space-800/90 backdrop-blur-xl border border-space-600 rounded-full p-1.5 shadow-2xl ring-1 ring-white/10">
-        <ToolbarButton
-          onClick={() => {
-            const next = theme === 'system' ? 'dark' : theme === 'dark' ? 'light' : 'system';
-            setTheme(next);
-          }}
-          title={`${t.theme}: ${t[theme]}`}
-        >
-          {theme === 'light' ? <Sun size={20} /> : theme === 'dark' ? <Moon size={20} /> : <Monitor size={20} />}
-        </ToolbarButton>
+    <div className="absolute bottom-4 left-1/2 z-50 flex w-[calc(100%-1.5rem)] max-w-max -translate-x-1/2 gap-2 sm:bottom-6 sm:w-auto">
+      <div className="flex w-full items-center justify-center overflow-x-auto bg-space-800/90 backdrop-blur-xl border border-space-600 rounded-full p-1.5 shadow-2xl ring-1 ring-white/10 sm:w-auto">
+        <ThemeSegmented theme={theme} setTheme={setTheme} labels={{ light: t.light, dark: t.dark, system: t.system, theme: t.theme }} />
 
         <Divider />
 
@@ -144,11 +136,51 @@ function ToolbarButton(props: {
     <button
       onClick={props.onClick}
       disabled={props.disabled}
-      className="p-3 rounded-full text-space-600 hover:text-nebula-400 hover:bg-space-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      className="p-3 rounded-full text-space-600 hover:text-nebula-400 hover:bg-space-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nebula-500 focus-visible:ring-offset-2 focus-visible:ring-offset-space-800"
       title={props.title}
+      aria-label={props.title}
     >
       {props.children}
     </button>
+  );
+}
+
+function ThemeSegmented(props: {
+  theme: 'light' | 'dark' | 'system';
+  setTheme: (theme: 'light' | 'dark' | 'system') => void;
+  labels: { light: string; dark: string; system: string; theme: string };
+}) {
+  const options: Array<{ value: 'light' | 'dark' | 'system'; icon: ReactNode; label: string }> = [
+    { value: 'light', icon: <Sun size={16} />, label: props.labels.light },
+    { value: 'dark', icon: <Moon size={16} />, label: props.labels.dark },
+    { value: 'system', icon: <Monitor size={16} />, label: props.labels.system },
+  ];
+
+  return (
+    <div className="flex items-center gap-0.5" role="radiogroup" aria-label={props.labels.theme}>
+      {options.map((option) => {
+        const active = props.theme === option.value;
+
+        return (
+          <button
+            key={option.value}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            aria-label={`${props.labels.theme}: ${option.label}`}
+            title={`${props.labels.theme}: ${option.label}`}
+            onClick={() => props.setTheme(option.value)}
+            className={
+              active
+                ? 'flex items-center justify-center w-9 h-9 rounded-full bg-space-700 text-nebula-400 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.32)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nebula-500 focus-visible:ring-offset-2 focus-visible:ring-offset-space-800 transition-colors'
+                : 'flex items-center justify-center w-9 h-9 rounded-full text-space-600 hover:text-starlight-100 hover:bg-space-700/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nebula-500 focus-visible:ring-offset-2 focus-visible:ring-offset-space-800 transition-colors'
+            }
+          >
+            {option.icon}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 

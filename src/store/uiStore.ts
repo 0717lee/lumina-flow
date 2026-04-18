@@ -7,12 +7,16 @@ type FlowUiState = {
   pendingFocusNodeId: string | null;
   workspaceOpen: boolean;
   inspectorOpen: boolean;
+  searchFocusNonce: number;
+  helpOverlayOpen: boolean;
   setSelection: (nodeId: string | null, connectedNodeIds?: string[]) => void;
   setHighlightedNodeIds: (nodeIds: string[]) => void;
   requestNodeFocus: (nodeId: string | null) => void;
   clearPendingFocus: () => void;
   setWorkspaceOpen: (isOpen: boolean) => void;
   setInspectorOpen: (isOpen: boolean) => void;
+  requestSearchFocus: () => void;
+  setHelpOverlayOpen: (isOpen: boolean) => void;
   resetCanvasUi: () => void;
 };
 
@@ -23,6 +27,8 @@ export const useFlowUiStore = create<FlowUiState>((set) => ({
   pendingFocusNodeId: null,
   workspaceOpen: false,
   inspectorOpen: false,
+  searchFocusNonce: 0,
+  helpOverlayOpen: false,
   setSelection: (nodeId, connectedNodeIds = []) =>
     set({
       selectedNodeId: nodeId,
@@ -47,6 +53,14 @@ export const useFlowUiStore = create<FlowUiState>((set) => ({
   setInspectorOpen: (isOpen) =>
     set({
       inspectorOpen: isOpen,
+    }),
+  requestSearchFocus: () =>
+    set((state) => ({
+      searchFocusNonce: state.searchFocusNonce + 1,
+    })),
+  setHelpOverlayOpen: (isOpen) =>
+    set({
+      helpOverlayOpen: isOpen,
     }),
   resetCanvasUi: () =>
     set({

@@ -5,6 +5,7 @@ import { memo, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import useFlowStore from '@/store/flowStore';
 import { useFlowUiStore } from '@/store/uiStore';
+import { useToastStore } from '@/store/toastStore';
 import { translations } from '@/i18n/translations';
 import type { FlowNode } from '@/types/flow';
 
@@ -47,6 +48,8 @@ function GlassNode({ id, data, selected }: NodeProps<FlowNode>) {
   const [draftLabel, setDraftLabel] = useState(data.label);
   const t = translations[language];
   const palette = colorClasses[data.color];
+  const badgeTypography = language === 'zh' ? 'tracking-wide' : 'uppercase tracking-[0.3em]';
+  const typeTypography = language === 'zh' ? 'tracking-widest' : 'uppercase tracking-[0.3em]';
 
   const startEditing = (): void => {
     setDraftLabel(data.label);
@@ -79,12 +82,19 @@ function GlassNode({ id, data, selected }: NodeProps<FlowNode>) {
         onClick={(event) => {
           event.stopPropagation();
           deleteNode(id);
+          useToastStore.getState().push({
+            tone: 'info',
+            message: t.toastNodeDeleted,
+            actionLabel: t.toastUndo,
+            onAction: () => useFlowStore.getState().undo(),
+          });
         }}
         className={clsx(
-          'absolute -top-3 -right-3 z-50 p-1.5 rounded-full bg-space-900 border border-space-700 text-starlight-400 hover:text-red-400 hover:border-red-900 transition-all opacity-0 scale-75',
+          'absolute -top-2 -right-2 z-50 p-1.5 rounded-full bg-space-900 border border-space-700 text-starlight-400 hover:text-red-400 hover:border-red-900 transition-all opacity-0 scale-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nebula-500 focus-visible:ring-offset-2 focus-visible:ring-offset-space-800',
           selected || isEditing ? 'opacity-100 scale-100' : 'group-hover:opacity-100 group-hover:scale-100',
         )}
         title={t.delete}
+        aria-label={`${t.delete}: ${data.label}`}
       >
         <Trash2 size={14} />
       </button>
@@ -99,9 +109,9 @@ function GlassNode({ id, data, selected }: NodeProps<FlowNode>) {
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-2">
             <div className={clsx('w-2.5 h-2.5 rounded-full', palette.accent)} />
-            <span className="text-[10px] text-space-600 uppercase tracking-[0.3em] font-mono">{t.nodeType}</span>
+            <span className={clsx('text-[10px] text-space-600 font-mono', typeTypography)}>{t.nodeType}</span>
           </div>
-          <span className={clsx('text-[10px] px-2 py-1 rounded-full uppercase tracking-[0.25em]', palette.badge)}>
+          <span className={clsx('text-[10px] px-2 py-1 rounded-full', badgeTypography, palette.badge)}>
             {t.statuses[data.status]}
           </span>
         </div>

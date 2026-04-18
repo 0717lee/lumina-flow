@@ -7,6 +7,7 @@ import { translations } from '@/i18n/translations';
 import GlassNode from '@/nodes/GlassNode';
 import useFlowStore, { selectActiveBoard } from '@/store/flowStore';
 import { useFlowUiStore } from '@/store/uiStore';
+import EmptyState from '@/components/EmptyState';
 import type { FlowEdge } from '@/types/flow';
 
 const nodeTypes = {
@@ -31,9 +32,12 @@ export default function FlowCanvas() {
   const undo = useFlowStore((state) => state.undo);
   const redo = useFlowStore((state) => state.redo);
   const selectedNodeId = useFlowUiStore((state) => state.selectedNodeId);
+  const helpOverlayOpen = useFlowUiStore((state) => state.helpOverlayOpen);
   const requestNodeFocus = useFlowUiStore((state) => state.requestNodeFocus);
   const resetCanvasUi = useFlowUiStore((state) => state.resetCanvasUi);
   const setSelection = useFlowUiStore((state) => state.setSelection);
+  const requestSearchFocus = useFlowUiStore((state) => state.requestSearchFocus);
+  const setHelpOverlayOpen = useFlowUiStore((state) => state.setHelpOverlayOpen);
   const { screenToFlowPosition, fitView, zoomIn, zoomOut } = useReactFlow();
   const [isLayouting, setIsLayouting] = useState(false);
   const t = translations[language];
@@ -54,7 +58,26 @@ export default function FlowCanvas() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
+      if (helpOverlayOpen) {
+        return;
+      }
+
       if (isEditableTarget(event.target)) {
+        return;
+      }
+
+      const isSearchFocusShortcut =
+        event.key === '/' || ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k');
+
+      if (isSearchFocusShortcut) {
+        event.preventDefault();
+        requestSearchFocus();
+        return;
+      }
+
+      if (event.key === '?') {
+        event.preventDefault();
+        setHelpOverlayOpen(true);
         return;
       }
 
@@ -104,7 +127,7 @@ export default function FlowCanvas() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [createLinkedNode, deleteNode, redo, requestNodeFocus, resetCanvasUi, selectedNodeId, undo]);
+  }, [createLinkedNode, deleteNode, helpOverlayOpen, redo, requestNodeFocus, requestSearchFocus, resetCanvasUi, selectedNodeId, setHelpOverlayOpen, undo]);
 
   const onPaneDoubleClick = (event: MouseEvent<HTMLDivElement>): void => {
     const target = event.target as HTMLElement;
@@ -152,6 +175,7 @@ export default function FlowCanvas() {
 
   return (
     <div className="w-full h-full bg-space-950">
+      {nodes.length === 0 ? <EmptyState /> : null}
       <div className="w-full h-full" onDoubleClick={onPaneDoubleClick}>
         <ReactFlow
           nodes={nodes}
@@ -186,7 +210,7 @@ export default function FlowCanvas() {
             className="opacity-40 transition-colors duration-300"
           />
 
-          <div className="absolute bottom-6 left-6 z-50 flex flex-col gap-1 bg-space-800/90 border border-space-700 rounded-2xl p-1.5 shadow-xl backdrop-blur-xl">
+          <div className="absolute bottom-24 left-4 z-50 flex flex-col gap-1 rounded-2xl border border-space-700 bg-space-800/90 p-1.5 shadow-xl backdrop-blur-xl sm:bottom-6 sm:left-6">
             <ControlButton onClick={() => zoomIn()} title={t.zoomIn}>
               <Plus size={16} />
             </ControlButton>
@@ -221,8 +245,9 @@ function ControlButton(props: {
     <button
       onClick={props.onClick}
       disabled={props.disabled}
-      className="p-2 text-nebula-400 hover:bg-space-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      className="rounded-xl p-2 text-nebula-400 transition-colors hover:bg-space-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nebula-500/80 focus-visible:ring-offset-1 focus-visible:ring-offset-space-900"
       title={props.title}
+      aria-label={props.title}
     >
       {props.children}
     </button>

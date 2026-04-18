@@ -16,7 +16,7 @@
     /* Surface/Cards */
     --space-700: #cbd5e1;
     /* Borders */
-    --space-600: #94a3b8;
+    --space-600: #64748b;
     /* Hover/Accents */
 
     --starlight-100: #0f172a;
@@ -54,6 +54,11 @@
     /* Ensure standard pointer by default */
   }
 
+  :focus-visible {
+    outline: 2px solid var(--nebula-500);
+    outline-offset: 2px;
+  }
+
   /* High-visibility caret for inputs */
   input,
   textarea,
@@ -87,9 +92,9 @@
     opacity: 1;
   }
 
-  .lumina-field:focus {
+  .lumina-field:focus-visible {
     border-color: var(--nebula-500);
-    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.45);
   }
 
   .lumina-field:-webkit-autofill,

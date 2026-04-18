@@ -24,9 +24,13 @@ export default function InspectorPanel() {
 
   return (
     <aside
+      role="complementary"
+      aria-label={t.inspector}
       className={clsx(
-        'absolute top-40 right-6 z-50 w-80 max-h-[calc(100vh-11rem)] overflow-y-auto rounded-[28px] p-4 transition-all duration-300 lumina-panel',
-        inspectorOpen ? 'translate-x-0 opacity-100 pointer-events-auto' : 'translate-x-6 opacity-0 pointer-events-none',
+        'absolute bottom-0 left-0 right-0 z-50 h-[calc(100vh-8rem)] overflow-y-auto rounded-t-[28px] p-4 transition-all duration-300 lumina-panel md:top-40 md:left-auto md:right-6 md:h-auto md:max-h-[calc(100vh-11rem)] md:w-72 md:rounded-[28px] lg:w-80',
+        inspectorOpen
+          ? 'translate-y-0 opacity-100 pointer-events-auto md:translate-x-0'
+          : 'translate-y-full opacity-0 pointer-events-none md:translate-x-6 md:translate-y-0',
       )}
     >
       <div className="flex items-center justify-between">
@@ -86,6 +90,7 @@ function NodeInspectorForm({ node }: { node: FlowNode }) {
             }
           }}
           className="lumina-field"
+          aria-label={t.label}
         />
       </Field>
 
@@ -96,6 +101,7 @@ function NodeInspectorForm({ node }: { node: FlowNode }) {
           onBlur={() => updateNode(node.id, { note: note.trim() })}
           className="lumina-field min-h-28 resize-y py-3"
           placeholder={t.notePlaceholder}
+          aria-label={t.note}
         />
       </Field>
 
@@ -112,6 +118,7 @@ function NodeInspectorForm({ node }: { node: FlowNode }) {
           }}
           className="lumina-field"
           placeholder={t.tagsPlaceholder}
+          aria-label={t.tags}
         />
       </Field>
 
@@ -120,6 +127,7 @@ function NodeInspectorForm({ node }: { node: FlowNode }) {
           value={node.data.status}
           onChange={(event) => updateNode(node.id, { status: event.target.value as (typeof FLOW_NODE_STATUSES)[number] })}
           className="lumina-field"
+          aria-label={t.status}
         >
           {FLOW_NODE_STATUSES.map((status) => (
             <option key={status} value={status}>
@@ -139,6 +147,9 @@ function NodeInspectorForm({ node }: { node: FlowNode }) {
                 'rounded-2xl border border-space-700 bg-space-900 p-2 transition-colors',
                 node.data.color === color ? 'border-white/20 ring-1 ring-white/15' : 'hover:border-nebula-500/40',
               )}
+              aria-label={t.colors[color]}
+              title={t.colors[color]}
+              type="button"
             >
               <div className={`h-8 rounded-xl ${colorButtonClasses[color]}`} />
               <div className="mt-2 text-[11px] text-starlight-400">{t.colors[color]}</div>
