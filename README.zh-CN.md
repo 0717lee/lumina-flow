@@ -1,4 +1,4 @@
-# Lumina Flow - 空间思维引擎
+# Lumina Flow
 
 [English](./README.md) | **简体中文**
 
