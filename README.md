@@ -1,4 +1,4 @@
-# Lumina Flow - Spatial Thought Engine
+# Lumina Flow
 
 **English** | [简体中文](./README.zh-CN.md)
 
